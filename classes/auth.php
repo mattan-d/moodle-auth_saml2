@@ -271,7 +271,7 @@ class auth extends \auth_plugin_base {
             if (!empty($idp->logo)) {
                 $idpiconurl = new moodle_url($idp->logo);
             } else {
-                $idpicon = new pix_icon('i/user', 'Login');
+                $idpicon = new pix_icon('o365color', 'Login', 'local_o365');
             }
 
             // Initially use the default name. This is suitable for a single IdP.
