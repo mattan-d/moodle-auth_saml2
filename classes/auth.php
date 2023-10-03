@@ -37,9 +37,9 @@ use moodle_exception;
 use stdClass;
 
 global $CFG;
-require_once($CFG->libdir.'/authlib.php');
-require_once($CFG->dirroot.'/login/lib.php');
-require_once(__DIR__.'/../locallib.php');
+require_once($CFG->libdir . '/authlib.php');
+require_once($CFG->dirroot . '/login/lib.php');
+require_once(__DIR__ . '/../locallib.php');
 
 /**
  * Plugin for Saml2 authentication.
@@ -59,7 +59,7 @@ class auth extends \auth_plugin_base {
     private $multiidp = false;
 
     /**
-     * @var stdClass $defaultidp.
+     * @var stdClass $defaultidp .
      */
     private $defaultidp;
 
@@ -67,28 +67,28 @@ class auth extends \auth_plugin_base {
      * @var array $defaults The config defaults
      */
     public $defaults = [
-        'idpname'            => '',
-        'idpdefaultname'     => '', // Set in constructor.
-        'idpmetadata'        => '',
-        'debug'              => 0,
-        'duallogin'          => saml2_settings::OPTION_DUAL_LOGIN_YES,
-        'autologin'          => saml2_settings::OPTION_AUTO_LOGIN_NO,
-        'autologincookie'    => '',
-        'anyauth'            => 1,
-        'idpattr'            => 'uid',
-        'mdlattr'            => 'username',
-        'tolower'            => saml2_settings::OPTION_TOLOWER_EXACT,
-        'autocreate'         => 0,
-        'spmetadatasign'     => true,
-        'showidplink'        => true,
-        'alterlogout'        => '',
-        'idpmetadatarefresh' => 0,
-        'logtofile'          => 0,
-        'logdir'             => '/tmp/',
-        'nameidasattrib'     => 0,
-        'flagresponsetype'   => saml2_settings::OPTION_FLAGGED_LOGIN_MESSAGE,
-        'flagredirecturl'    => '',
-        'flagmessage'        => '' // Set in constructor.
+            'idpname' => '',
+            'idpdefaultname' => '', // Set in constructor.
+            'idpmetadata' => '',
+            'debug' => 0,
+            'duallogin' => saml2_settings::OPTION_DUAL_LOGIN_YES,
+            'autologin' => saml2_settings::OPTION_AUTO_LOGIN_NO,
+            'autologincookie' => '',
+            'anyauth' => 1,
+            'idpattr' => 'uid',
+            'mdlattr' => 'username',
+            'tolower' => saml2_settings::OPTION_TOLOWER_EXACT,
+            'autocreate' => 0,
+            'spmetadatasign' => true,
+            'showidplink' => true,
+            'alterlogout' => '',
+            'idpmetadatarefresh' => 0,
+            'logtofile' => 0,
+            'logdir' => '/tmp/',
+            'nameidasattrib' => 0,
+            'flagresponsetype' => saml2_settings::OPTION_FLAGGED_LOGIN_MESSAGE,
+            'flagredirecturl' => '',
+            'flagmessage' => '' // Set in constructor.
     ];
 
     /**
@@ -112,7 +112,7 @@ class auth extends \auth_plugin_base {
         $this->certpem = $this->get_file("{$this->spname}.pem");
         $this->certcrt = $this->get_file("{$this->spname}.crt");
 
-        $this->config = (object) array_merge($this->defaults, (array) get_config('auth_saml2') );
+        $this->config = (object) array_merge($this->defaults, (array) get_config('auth_saml2'));
 
         // Parsed IdP metadata, either a list of IdP metadata urls or a single XML blob.
         $parser = new idp_parser();
@@ -186,7 +186,7 @@ class auth extends \auth_plugin_base {
      */
     public function get_file_idp_metadata_file($url) {
         if (is_object($url)) {
-            $url = (array)$url;
+            $url = (array) $url;
         }
 
         if (is_array($url)) {
@@ -210,7 +210,7 @@ class auth extends \auth_plugin_base {
 
             // If SSP logs to tmp file we want these to also go there.
             if ($this->config->logtofile) {
-                require_once(__DIR__.'/../setup.php');
+                require_once(__DIR__ . '/../setup.php');
                 \SimpleSAML\Logger::debug('auth_saml2: ' . $msg);
             }
         }
@@ -251,8 +251,9 @@ class auth extends \auth_plugin_base {
 
             // Moodle Workplace - Check IdP's tenant availability.
             // Check if function exists required for Totara 12 compatibility.
-            if (class_exists(\tool_tenant\local\auth\saml2\manager::class) && !component_class_callback('\tool_tenant\local\auth\saml2\manager',
-                    'issuer_available', [$idp->md5entityid], true)) {
+            if (class_exists(\tool_tenant\local\auth\saml2\manager::class) &&
+                    !component_class_callback('\tool_tenant\local\auth\saml2\manager',
+                            'issuer_available', [$idp->md5entityid], true)) {
                 continue;
             }
 
@@ -298,11 +299,12 @@ class auth extends \auth_plugin_base {
                 $idpname = $conf->idpname;
             }
 
+            $idpname = get_string('idpnamedefault', 'auth_saml2');
             $idplist[] = [
-                'url'  => $idpurl,
-                'icon' => $idpicon,
-                'iconurl' => $idpiconurl,
-                'name' => $idpname,
+                    'url' => $idpurl,
+                    'icon' => $idpicon,
+                    'iconurl' => $idpiconurl,
+                    'name' => $idpname,
             ];
         }
 
@@ -492,8 +494,8 @@ class auth extends \auth_plugin_base {
             // Inject JS to test connectivity to the login endpoint. Some networks may not be aware of the IdP.
             global $PAGE, $ME;
             $PAGE->requires->js_call_amd('auth_saml2/connectivity_test', 'init', [
-                $this->config->testendpoint,
-                (new moodle_url($ME, ['saml' => 'on']))->out(),
+                    $this->config->testendpoint,
+                    (new moodle_url($ME, ['saml' => 'on']))->out(),
             ]);
             return false;
         }
@@ -554,7 +556,7 @@ class auth extends \auth_plugin_base {
     public function saml_login() {
         global $CFG, $SESSION;
 
-        require_once(__DIR__.'/../setup.php');
+        require_once(__DIR__ . '/../setup.php');
         require_once("$CFG->dirroot/login/lib.php");
 
         // Set the default IdP to be the first in the list. Used when dual login is disabled.
@@ -598,7 +600,7 @@ class auth extends \auth_plugin_base {
 
         // Configure passive authentication.
         $passive = $this->config->duallogin == saml2_settings::OPTION_DUAL_LOGIN_PASSIVE;
-        $passive = (bool)optional_param('passive', $passive, PARAM_BOOL);
+        $passive = (bool) optional_param('passive', $passive, PARAM_BOOL);
         $params = ['isPassive' => $passive];
         if ($passive) {
             $params['ErrorURL'] = (new moodle_url('/login/index.php', ['saml' => 0]))->out(false);
@@ -613,7 +615,6 @@ class auth extends \auth_plugin_base {
         $attributes = $auth->getAttributes();
         $this->saml_login_complete($attributes);
     }
-
 
     /**
      * The user has done the SAML handshake now we can log them in
@@ -633,7 +634,7 @@ class auth extends \auth_plugin_base {
         if (empty($attributes[$attr])) {
             // Missing mapping IdP attribute. Login failed.
             $event = \core\event\user_login_failed::create(['other' => ['username' => 'unknown',
-                'reason' => AUTH_LOGIN_NOUSER]]);
+                    'reason' => AUTH_LOGIN_NOUSER]]);
             $event->trigger();
             $this->error_page(get_string('noattribute', 'auth_saml2', $attr));
         }
@@ -641,7 +642,7 @@ class auth extends \auth_plugin_base {
         // Testing user's groups and allow access according to preferences.
         if (!$this->is_access_allowed_for_member($attributes)) {
             $event = \core\event\user_login_failed::create(['other' => ['username' => 'unknown',
-                'reason' => AUTH_LOGIN_UNAUTHORISED]]);
+                    'reason' => AUTH_LOGIN_UNAUTHORISED]]);
             $event->trigger();
             $this->handle_blocked_access();
         }
@@ -674,7 +675,7 @@ class auth extends \auth_plugin_base {
         // Check if function exists required for Totara 12 compatibility.
         if (class_exists(\tool_tenant\local\auth\saml2\manager::class)) {
             component_class_callback('\tool_tenant\local\auth\saml2\manager', 'complete_login_hook',
-                [$SESSION->saml2idp ?? '', $uid, $user]);
+                    [$SESSION->saml2idp ?? '', $uid, $user]);
         }
 
         $newuser = false;
@@ -685,7 +686,7 @@ class auth extends \auth_plugin_base {
                 // If can't have accounts with the same emails, check if email is taken before create a new user.
                 if (empty($CFG->allowaccountssameemail) && $this->is_email_taken($email)) {
                     $event = \core\event\user_login_failed::create(['other' => ['username' => $uid,
-                        'reason' => AUTH_LOGIN_FAILED]]);
+                            'reason' => AUTH_LOGIN_FAILED]]);
                     $event->trigger();
 
                     $this->log(__FUNCTION__ . " user '$uid' can't be autocreated as email '$email' is taken");
@@ -695,7 +696,7 @@ class auth extends \auth_plugin_base {
                 // Honor the core allowemailaddresses setting.
                 if ($error = email_is_not_allowed($email)) {
                     $event = \core\event\user_login_failed::create(['other' => ['username' => $uid,
-                        'reason' => AUTH_LOGIN_FAILED]]);
+                            'reason' => AUTH_LOGIN_FAILED]]);
                     $event->trigger();
 
                     $this->log(__FUNCTION__ . " '$email' " . $error);
@@ -715,7 +716,7 @@ class auth extends \auth_plugin_base {
                 }
 
                 $this->log(__FUNCTION__ . " user '$user->username' is not in moodle so autocreating");
-                require_once($CFG->dirroot.'/user/lib.php');
+                require_once($CFG->dirroot . '/user/lib.php');
 
                 // Various values that user_create_user doesn't validate or set.
                 $user->confirmed = 1;
@@ -733,7 +734,7 @@ class auth extends \auth_plugin_base {
             } else {
                 // Moodle user does not exist and settings prevent creating new accounts.
                 $event = \core\event\user_login_failed::create(['other' => ['username' => $uid,
-                    'reason' => AUTH_LOGIN_NOUSER]]);
+                        'reason' => AUTH_LOGIN_NOUSER]]);
                 $event->trigger();
                 $this->log(__FUNCTION__ . " user '$uid' is not in moodle so error");
                 $this->error_page(get_string('nouser', 'auth_saml2', $uid));
@@ -742,27 +743,27 @@ class auth extends \auth_plugin_base {
             // Prevent access to users who are suspended.
             if ($user->suspended) {
                 $event = \core\event\user_login_failed::create([
-                    'userid' => $user->id,
-                    'other' => [
-                        'username' => $user->username,
-                        'reason' => AUTH_LOGIN_SUSPENDED,
-                    ]
+                        'userid' => $user->id,
+                        'other' => [
+                                'username' => $user->username,
+                                'reason' => AUTH_LOGIN_SUSPENDED,
+                        ]
                 ]);
                 $event->trigger();
 
                 $this->error_page(get_string('suspendeduser', 'auth_saml2', $uid));
             }
 
-            $this->log(__FUNCTION__ . ' found user '.$user->username);
+            $this->log(__FUNCTION__ . ' found user ' . $user->username);
         }
 
         if (!$this->config->anyauth && $user->auth != 'saml2') {
             $event = \core\event\user_login_failed::create([
-                'userid' => $user->id,
-                'other' => [
-                    'username' => $user->username,
-                    'reason' => AUTH_LOGIN_UNAUTHORISED,
-                ]
+                    'userid' => $user->id,
+                    'other' => [
+                            'username' => $user->username,
+                            'reason' => AUTH_LOGIN_UNAUTHORISED,
+                    ]
             ]);
             $event->trigger();
 
@@ -772,17 +773,17 @@ class auth extends \auth_plugin_base {
 
         if ($this->config->anyauth && !is_enabled_auth($user->auth)) {
             $event = \core\event\user_login_failed::create([
-                'userid' => $user->id,
-                'other' => [
-                    'username' => $user->username,
-                    'reason' => AUTH_LOGIN_UNAUTHORISED,
-                ]
+                    'userid' => $user->id,
+                    'other' => [
+                            'username' => $user->username,
+                            'reason' => AUTH_LOGIN_UNAUTHORISED,
+                    ]
             ]);
             $event->trigger();
 
             $this->log(__FUNCTION__ . " user $uid's auth type: $user->auth is not enabled");
             $this->error_page(get_string('anyauthotherdisabled', 'auth_saml2', [
-                'username' => $uid, 'auth' => $user->auth,
+                    'username' => $uid, 'auth' => $user->auth,
             ]));
         }
 
@@ -808,13 +809,13 @@ class auth extends \auth_plugin_base {
 
         $wantsurl = core_login_get_return_url();
         // If we are not on the page we want, then redirect to it (unless this is CLI).
-        if ( qualified_me() !== false && qualified_me() !== $wantsurl ) {
+        if (qualified_me() !== false && qualified_me() !== $wantsurl) {
             $this->log(__FUNCTION__ . " redirecting to $wantsurl");
             unset($SESSION->wantsurl);
             redirect($wantsurl);
             exit;
         } else {
-            $this->log(__FUNCTION__ . " continuing onto " . qualified_me() );
+            $this->log(__FUNCTION__ . " continuing onto " . qualified_me());
         }
 
         return;
@@ -878,7 +879,7 @@ class auth extends \auth_plugin_base {
     public function is_access_allowed_for_member($attributes) {
 
         // If there is no encumberance attribute configured in Moodle, let them pass.
-        if (empty($this->config->grouprules) ) {
+        if (empty($this->config->grouprules)) {
             return true;
         }
 
@@ -942,6 +943,7 @@ class auth extends \auth_plugin_base {
      * saml2 configuration. Uses the attributes array as the source of data for updating each field.
      *
      * This is split into it's own function so update and creating users can use it
+     *
      * @param mixed $user The user record to update
      * @param mixed $attributes The attribute array (from the SAML Login)
      * @param bool $newuser If this user does not yet exist in the database
@@ -950,7 +952,7 @@ class auth extends \auth_plugin_base {
      * @throws Exception
      * @throws coding_exception
      */
-    public function update_user_record_from_attribute_map(&$user, $attributes, $newuser= false) {
+    public function update_user_record_from_attribute_map(&$user, $attributes, $newuser = false) {
         global $CFG;
 
         $mapconfig = get_config('auth_saml2');
@@ -960,9 +962,9 @@ class auth extends \auth_plugin_base {
         foreach ($allkeys as $key) {
             if (preg_match('/^field_updatelocal_(.+)$/', $key, $match)) {
                 $field = $match[1];
-                if (!empty($mapconfig->{'field_map_'.$field})) {
-                    $attr = $mapconfig->{'field_map_'.$field};
-                    $updateonlogin = $mapconfig->{'field_updatelocal_'.$field} === 'onlogin';
+                if (!empty($mapconfig->{'field_map_' . $field})) {
+                    $attr = $mapconfig->{'field_map_' . $field};
+                    $updateonlogin = $mapconfig->{'field_updatelocal_' . $field} === 'onlogin';
 
                     if ($newuser || $updateonlogin) {
                         // Basic error handling, check to see if the attributes exist before mapping the data.
@@ -975,7 +977,7 @@ class auth extends \auth_plugin_base {
                                     $email = $attributes[$attr][0];
                                     if ($this->is_email_taken($email, $user->username ?? null)) {
                                         $this->log(__FUNCTION__ .
-                                            " user '$user->username' email can't be updated as '$email' is taken");
+                                                " user '$user->username' email can't be updated as '$email' is taken");
                                         // Warn user that we are not able to update his email.
                                         \core\notification::warning(get_string('emailtakenupdate', 'auth_saml2', $email));
 
@@ -987,7 +989,7 @@ class auth extends \auth_plugin_base {
                                 if (!$newuser) {
                                     if ($field == $this->config->mdlattr || $field == 'username') {
                                         $this->log(__FUNCTION__ .
-                                            " user '$user->username' $field can't be updated once set");
+                                                " user '$user->username' $field can't be updated once set");
                                         \core\notification::warning("Your $field wasn't updated");
                                         continue;
                                     }
@@ -1021,7 +1023,7 @@ class auth extends \auth_plugin_base {
     public function update_user_profile_fields(&$user, $attributes, $newuser = false) {
         global $CFG;
         if ($this->update_user_record_from_attribute_map($user, $attributes, $newuser)) {
-            require_once($CFG->dirroot.'/user/lib.php');
+            require_once($CFG->dirroot . '/user/lib.php');
             if ($user->description === true) {
                 // Function get_complete_user_data() sets description = true to avoid keeping in memory.
                 // If set to true - don't update based on data from this call.
@@ -1082,9 +1084,9 @@ class auth extends \auth_plugin_base {
             // Make a case-insensitive query for the given email address.
             $select = $DB->sql_equal('email', ':email', false) . ' AND mnethostid = :mnethostid AND deleted = :deleted';
             $params = array(
-                'email' => $email,
-                'mnethostid' => $CFG->mnet_localhost_id,
-                'deleted' => 0
+                    'email' => $email,
+                    'mnethostid' => $CFG->mnet_localhost_id,
+                    'deleted' => 0
             );
 
             if ($excludeusername) {
@@ -1126,7 +1128,7 @@ class auth extends \auth_plugin_base {
         // gets called by the normal core process.
         require_logout();
 
-        require_once(__DIR__.'/../setup.php');
+        require_once(__DIR__ . '/../setup.php');
 
         // We just loaded the SP session which replaces the Moodle so we lost
         // the session data, lets temporarily restore the IdP.
@@ -1138,7 +1140,7 @@ class auth extends \auth_plugin_base {
         $cookiename = $saml2config['session.cookie.name'];
         $cookiesecure = is_moodle_cookie_secure();
         setcookie($cookiename, '', time() - HOURSECS, $CFG->sessioncookiepath, $CFG->sessioncookiedomain,
-              $cookiesecure, $CFG->cookiehttponly);
+                $cookiesecure, $CFG->cookiehttponly);
 
         // Do not attempt to log out of the IdP.
         if (!$this->config->attemptsignout) {
@@ -1161,8 +1163,8 @@ class auth extends \auth_plugin_base {
                 $redirect = $alterlogout;
             }
             $auth->logout([
-                'ReturnTo' => $redirect,
-                'ReturnCallback' => ['\auth_saml2\api', 'after_logout_from_sp'],
+                    'ReturnTo' => $redirect,
+                    'ReturnCallback' => ['\auth_saml2\api', 'after_logout_from_sp'],
             ]);
         }
     }
@@ -1212,7 +1214,7 @@ class auth extends \auth_plugin_base {
             $mform->display();
         } else {
             echo $OUTPUT->render(new notification(get_string('test_noticetestrequirements', 'auth_saml2'),
-                notification::NOTIFY_WARNING, false));
+                    notification::NOTIFY_WARNING, false));
 
         }
     }
@@ -1251,18 +1253,18 @@ class auth extends \auth_plugin_base {
             return;
         }
 
-        $cookiename = 'MOODLEIDP1_'.$CFG->sessioncookie;
+        $cookiename = 'MOODLEIDP1_' . $CFG->sessioncookie;
 
         $cookiesecure = is_moodle_cookie_secure();
 
         // Delete old cookie.
         setcookie($cookiename, '', time() - HOURSECS, $CFG->sessioncookiepath, $CFG->sessioncookiedomain,
-                  $cookiesecure, $CFG->cookiehttponly);
+                $cookiesecure, $CFG->cookiehttponly);
 
         if ($idp !== '') {
             // Set username cookie for 60 days.
             setcookie($cookiename, $idp, time() + (DAYSECS * 60), $CFG->sessioncookiepath, $CFG->sessioncookiedomain,
-                      $cookiesecure, $CFG->cookiehttponly);
+                    $cookiesecure, $CFG->cookiehttponly);
         }
     }
 
@@ -1278,7 +1280,7 @@ class auth extends \auth_plugin_base {
             return '';
         }
 
-        $cookiename = 'MOODLEIDP1_'.$CFG->sessioncookie;
+        $cookiename = 'MOODLEIDP1_' . $CFG->sessioncookie;
 
         if (empty($_COOKIE[$cookiename])) {
             return '';
@@ -1289,6 +1291,7 @@ class auth extends \auth_plugin_base {
 
     /**
      * Execute callback function
+     *
      * @param string $function name of the callback function to be executed
      * @param string $file file to find the function
      */
